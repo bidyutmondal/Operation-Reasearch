@@ -8,10 +8,10 @@ def read():
     global var, n, mat, count, obj
     var = int(input("Enter the number of variables: "))
     n = int(input("Enter the number of equations: "))
-    mat = [[]for i in range(n)]
-    nmat = [[]for i in range(n)]
-    cnst = []
-    arr = []
+    mat = [[]for i in range(n)]     # coefficient matrix
+    nmat = [[]for i in range(n)]        #coefficient matrix without artificial and surplus variable
+    cnst = []       # constant term in constraint
+    arr = []        # to store artificial variable
     
     for i in range(var):
         arr.append(0)
@@ -90,8 +90,8 @@ def read():
 
 def revSimplex():
     global basis, basic, b, n_b
-    basis = []
-    b = [[]for i in range(n)]
+    basis = []          #to store basic variables during each iteration
+    b = [[]for i in range(n)]       # n*n basis matrix to store coefficients of basic variables in each constraints 
     for i in range(n):
         for j in range(var,count):
             if(mat[i][j] == 1):
@@ -121,20 +121,22 @@ if __name__ == '__main__':
     print("\n------------------------------------------------------------------")
     while(1):
         print("------------------------------------------------------------------\n")
-        print("Interation : " , itr+1, "\n")
-        cb = [obj[basis[i]]for i in range(n)]
+        print("Iteration : " , itr+1, "\n")
+        cb = [obj[basis[i]]for i in range(n)]       #coefficients of basic variables in objective function    
         print("Basic variables : ", end='')
         for j in range(n):
             print(f"x{basis[j]+1}, ", end='')
-        b = np.dot(b, n_b)
+        b = np.dot(b, n_b)                      #multiplying new basis matrix to old basis matrix
         print("\nTransform basis matrix")
         print(b, "\n")
         det = np.linalg.det(b)
-        if(det == 0):
+        if(det == 0):   #checking determinant is  zero or not
             print("NO SOLUTION ")
             break 
         elif(det != 0):
             inv_b = np.linalg.inv(b)
+
+        # y = cb*inverse(b)
         y = np.dot(cb, inv_b)
         col = -1
         mx = 0
@@ -151,7 +153,7 @@ if __name__ == '__main__':
             ans = 0
             f = 0
             for j in range(n):
-                if(obj[basis[j]] == -1*M):
+                if(obj[basis[j]] == -1*M):  # if an artificial variable present in basis matrix but cj-zj<0 so no sloution
                     f = 1
                     break
     
@@ -178,6 +180,7 @@ if __name__ == '__main__':
     
         row = -1
         zm=1e5
+        # we have to find smallest ratio
         for j in range(n):
             if(rep[j][0]>0):
                 if(zm>mat[j][count]/rep[j][0]):
@@ -189,7 +192,7 @@ if __name__ == '__main__':
                 if(j != row):
                     mat[j][count] -= rep[j][0]*zm
             mat[row][count] = zm
-        elif(row == -1):
+        elif(row == -1):    #if there is no entering variable but cj-zj>0 so unbounded solution
             print("UNBOUNDED SOLUTION")
             break
     
@@ -208,7 +211,7 @@ if __name__ == '__main__':
                     n_b[j][k] = 0
     
         for j in range(n):
-            n_b[j][row] = rep[j][0]
+            n_b[j][row] = rep[j][0]     # entering modified variables of entering variables
         print("\n------------------------------------------------------------------")
         itr+=1
     print("\n------------------------------------------------------------------")
